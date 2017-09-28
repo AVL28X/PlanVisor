@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         val fab = findViewById(R.id.fab) as FloatingActionButton
         fab.setOnClickListener { view ->
-            Snackbar.make(view, "Haoxiang, the true Googler!", Snackbar.LENGTH_LONG)
+            Snackbar.make(view, "Haoxiang!", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
         }
 
