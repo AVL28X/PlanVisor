@@ -1,5 +1,6 @@
-package io.chenxi.planvisor
+package io.chenxi.easyplan
 
+import android.net.TrafficStats
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.Snackbar
@@ -23,7 +24,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         val fab = findViewById(R.id.fab) as FloatingActionButton
         fab.setOnClickListener { view ->
-            Snackbar.make(view, "Haoxiang!", Snackbar.LENGTH_LONG)
+            Snackbar.make(view, "Haoxiiang!", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
         }
 
@@ -72,6 +73,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (id == R.id.nav_camera) {
             // Handle the camera action
         } else if (id == R.id.nav_gallery) {
+
 
         } else if (id == R.id.nav_slideshow) {
 

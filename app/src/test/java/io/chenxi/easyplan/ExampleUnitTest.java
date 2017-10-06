@@ -1,4 +1,4 @@
-package io.chenxi.planvisor;
+package io.chenxi.easyplan;
 
 import org.junit.Test;
 
