@@ -7,6 +7,7 @@ import android.app.usage.NetworkStats
 import android.app.usage.NetworkStatsManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
@@ -23,6 +24,12 @@ import android.util.Log
 import io.chenxi.easyplan.util.DataUtils
 import io.chenxi.easyplan.util.PermissionUtils
 import io.chenxi.easyplan.util.TimeUtils
+import lecho.lib.hellocharts.model.Line
+import lecho.lib.hellocharts.model.LineChartData
+import lecho.lib.hellocharts.model.PointValue
+import lecho.lib.hellocharts.view.LineChartView
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class TrafficStatsScrollingActivity : AppCompatActivity() {
@@ -52,10 +59,46 @@ class TrafficStatsScrollingActivity : AppCompatActivity() {
                 Log.i("Info", "Daily Use ${DataUtils.convertByteToMB(bucket!!.rxBytes + bucket.txBytes)}")
                 bucket = networkStatsManager?.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE, getSubscriberId(this, ConnectivityManager.TYPE_MOBILE), monthStart, System.currentTimeMillis())
                 Log.i("Info", "Monthly Use ${DataUtils.convertByteToMB(bucket!!.rxBytes + bucket.txBytes)}")
-
-
+                val timeIntervals = TimeUtils.getDateIntervalsInMillis()
+                val rxUsageByDay = ArrayList<Float>()
+                val txUsageByDay = ArrayList<Float>()
+                val dates = ArrayList<String>()
+                val subscriberId = getSubscriberId(this, ConnectivityManager.TYPE_MOBILE)
+                for (i in 1 until timeIntervals.size) {
+                    bucket = networkStatsManager?.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE,
+                            subscriberId, timeIntervals[i - 1], timeIntervals[i])
+                    dates.add(SimpleDateFormat("MM/dd/yyyy").format(Date(timeIntervals[i - 1])))
+                    rxUsageByDay.add(DataUtils.convertByteToMB(bucket!!.rxBytes))
+                    txUsageByDay.add(DataUtils.convertByteToMB(bucket.txBytes))
+                }
+                Log.i("Usage", "$dates")
+                Log.i("Usage", "$rxUsageByDay")
+                Log.i("Usage", "$txUsageByDay")
             }
         }
+
+
+        val values = ArrayList<PointValue>()
+        values.add(PointValue(0f, 2f))
+        values.add(PointValue(1f, 4f))
+        values.add(PointValue(2f, 3f))
+        values.add(PointValue(3f, 4f))
+        values.add(PointValue(3f, 4f))
+        values.add(PointValue(3f, 4f))
+        values.add(PointValue(3f, 4f))
+
+        //In most cased you can call data model methods in builder-pattern-like manner.
+        val line = Line(values).setColor(Color.BLUE).setCubic(true)
+        val lines = ArrayList<Line>()
+        lines.add(line)
+
+        val data = LineChartData()
+        data.setLines(lines)
+
+        val chart = LineChartView(this)
+        chart.setLineChartData(data)
+
+
     }
 
 
