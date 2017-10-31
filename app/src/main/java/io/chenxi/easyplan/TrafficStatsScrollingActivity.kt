@@ -18,7 +18,6 @@ import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
-import android.system.Os
 import android.telephony.TelephonyManager
 import android.util.Log
 import io.chenxi.easyplan.util.DataUtils
@@ -49,8 +48,6 @@ class TrafficStatsScrollingActivity : AppCompatActivity() {
             run {
                 networkStatsManager = getSystemService(Context.NETWORK_STATS_SERVICE) as NetworkStatsManager
 
-                Snackbar.make(view, "Updating" + Os.getuid(), Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show()
 
                 var bucket: NetworkStats.Bucket?
                 val dayStart = TimeUtils.getTimeTodayStartInMillis()
@@ -71,9 +68,18 @@ class TrafficStatsScrollingActivity : AppCompatActivity() {
                     rxUsageByDay.add(DataUtils.convertByteToMB(bucket!!.rxBytes))
                     txUsageByDay.add(DataUtils.convertByteToMB(bucket.txBytes))
                 }
+                Snackbar.make(view, "Data Received ${rxUsageByDay}MB and sent ${txUsageByDay.sum()}MB ${dates[0]}", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show()
+
+
+
+
                 Log.i("Usage", "$dates")
                 Log.i("Usage", "$rxUsageByDay")
                 Log.i("Usage", "$txUsageByDay")
+
+
+
             }
         }
 
