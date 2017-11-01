@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.net.ConnectivityManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.RemoteException
@@ -20,6 +21,9 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.telephony.TelephonyManager
 import android.util.Log
+import android.webkit.WebView
+import io.chenxi.easyplan.rpc.ProMapper
+import io.chenxi.easyplan.rpc.client.DataPlanClient
 import io.chenxi.easyplan.util.DataUtils
 import io.chenxi.easyplan.util.PermissionUtils
 import io.chenxi.easyplan.util.TimeUtils
@@ -34,12 +38,20 @@ import java.util.*
 class TrafficStatsScrollingActivity : AppCompatActivity() {
 
     private var networkStatsManager: NetworkStatsManager? = null
+    private var mRpcClient: DataPlanClient?= null
 
     @TargetApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_traffic_stats_scrolling)
         val toolbar = findViewById(R.id.toolbar) as Toolbar
+        val webview = findViewById(R.id.webview) as WebView
+        mRpcClient = DataPlanClient("ec2-34-211-226-27.us-west-2.compute.amazonaws.com", 50051)
+
+
+
+
+//        webview.loadUrl("http://www.verizon.com")
         setSupportActionBar(toolbar)
         hasPermissionToReadNetworkStats()
         PermissionUtils.checkPermission(this, Manifest.permission.READ_PHONE_STATE)
@@ -68,18 +80,19 @@ class TrafficStatsScrollingActivity : AppCompatActivity() {
                     rxUsageByDay.add(DataUtils.convertByteToMB(bucket!!.rxBytes))
                     txUsageByDay.add(DataUtils.convertByteToMB(bucket.txBytes))
                 }
-                Snackbar.make(view, "Data Received ${rxUsageByDay}MB and sent ${txUsageByDay.sum()}MB ${dates[0]}", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show()
-
-
-
 
                 Log.i("Usage", "$dates")
                 Log.i("Usage", "$rxUsageByDay")
                 Log.i("Usage", "$txUsageByDay")
+//                Log.i("test", "${ProtoMapper.asRpcObjectArray(dates, rxUsageByDay, txUsageByDay)}")
 
+                val recommendationUri = "https://www.google.com"
+                Snackbar.make(view, "According to your data usage we recommend ${mRpcClient?.helloWorld()}", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show()
 
-
+//                val uri = Uri.parse(recommendationUri)
+//                val intent = Intent(Intent.ACTION_VIEW, uri)
+//                startActivity(intent)
             }
         }
 

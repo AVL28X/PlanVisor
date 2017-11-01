@@ -7,18 +7,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="io.chenxi.easyplan.TrafficStatsScrollingActivity">
-
-    <lecho.lib.hellocharts.view.LineChartView
-        android:id="@+id/chart"
+    <WebView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/text_margin"
-        />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/text_margin"
+        android:id="@+id/webview"
         android:text="@string/description_plan_default" />
 
 </android.support.v4.widget.NestedScrollView>

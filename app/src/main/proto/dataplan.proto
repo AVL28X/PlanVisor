@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.chenxi.easyplan.rpc.client";
+option java_outer_classname = "DataPlanProto";
+option objc_class_prefix = "DP";
+
+// The data plan service
+service DataPlanService {
+  rpc GetUserParam (UserParamRequest) returns (UserParams) {} //service to calibrate user parameters
+  rpc GetRecommendUsages (RecommendUsagesRequest) returns(UsagesResponse) {}  //service to recommend daily usages
+  rpc GetUtility( UtilityRequest ) returns( UtilityResponse ){}
+  rpc HelloWorld( HWRequest) returns( HWResponse ){}
+}
+
+// The request message containing daily usages and overage rate
+message UserParamRequest {
+  repeated Usage usages = 1;
+  double overage = 2;  // if overage > 0, heavy user, otherwise light user
+}
+
+// user parameters
+message UserParams {
+  double w1 = 1; //weights of each day of week
+  double w2 = 2;
+  double w3 = 3;
+  double w4 = 4;
+  double w5 = 5;
+  double w6 = 6;
+  double w7 = 7;
+  double phi = 8; // pi
+  double alpha = 9; //alpha
+}
+
+message UsagesRequest{
+  UserParams userParams = 1;
+  DataPlanMsg dataPlan = 2;
+}
+
+message RecommendUsagesRequest{
+  int32 year = 1;
+  int32 month = 2;
+  UserParams userParams = 3;
+  DataPlanMsg dataPlan = 4;
+}
+
+message UtilityRequest{
+  UserParams userParams = 1;
+  DataPlanMsg dataPlan = 2;
+}
+
+message UtilityResponse{
+  double utility = 1;
+}
+
+message UsagesResponse{
+  repeated Usage usages = 1;
+}
+
+message HWRequest{
+  string word = 1;
+}
+
+message HWResponse{
+  string word = 1;
+}
+
+
+message DataPlanMsg{
+  double quota = 1;
+  double overage = 2;
+  double price = 3;
+}
+
+
+//object of daily usage
+message Usage {
+  int32 year = 2;
+  int32 month = 3;
+  int32 day = 4;
+  double usage = 1;
+}
