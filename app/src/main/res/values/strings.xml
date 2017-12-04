@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">EasyPlan</string>
+    <string name="app_name">Easy Plan</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="action_settings">Settings</string>
@@ -60,7 +60,6 @@
     <string-array name="multi_select_list_preference_default_value" />
 
     <string name="pref_title_system_sync_settings">System sync settings</string>
-    <string name="title_activity_plan_recommend_default">Easy Plan</string>
     <string name="description_plan_default">
         "$40 per month. Get what you need on the network you want with more unlimited choices.\n\n
         3GB Plan\n
@@ -72,4 +71,9 @@
         Unlimited Text to over 200 international destinations
         "
     </string>
+    <string name="item_plan_desc_default">Plan Default Description</string>
+    <string name="item_plan_name_default">Plan Name Default</string>
+    <string name="image_desc_default">image</string>
+    <string name="item_plan_price">2GB
+        for $35/mo.</string>
 </resources>

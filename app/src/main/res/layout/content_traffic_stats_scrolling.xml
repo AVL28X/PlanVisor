@@ -6,12 +6,21 @@
     tools:showIn="@layout/activity_traffic_stats_scrolling"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginTop="@dimen/fab_margin"
     tools:context="io.chenxi.easyplan.TrafficStatsScrollingActivity">
-    <WebView
-        android:layout_width="wrap_content"
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/text_margin"
-        android:id="@+id/webview"
-        android:text="@string/description_plan_default" />
+        android:orientation="vertical"
+        android:padding="10dip">
+
+        <include layout="@layout/item_list_data_plan_form" />
+
+        <ListView
+            android:id="@+id/plan_listview"
+            android:layout_width="match_parent"
+            android:layout_height="200sp" />
+    </LinearLayout>
 
 </android.support.v4.widget.NestedScrollView>

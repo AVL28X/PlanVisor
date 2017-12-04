@@ -7,9 +7,7 @@ import android.app.usage.NetworkStats
 import android.app.usage.NetworkStatsManager
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.net.ConnectivityManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.RemoteException
@@ -21,43 +19,50 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.telephony.TelephonyManager
 import android.util.Log
-import android.webkit.WebView
-import io.chenxi.easyplan.rpc.ProMapper
+import android.widget.ListView
 import io.chenxi.easyplan.rpc.client.DataPlanClient
+import io.chenxi.easyplan.rpc.client.DataPlanMsg
 import io.chenxi.easyplan.util.DataUtils
 import io.chenxi.easyplan.util.PermissionUtils
 import io.chenxi.easyplan.util.TimeUtils
-import lecho.lib.hellocharts.model.Line
-import lecho.lib.hellocharts.model.LineChartData
-import lecho.lib.hellocharts.model.PointValue
-import lecho.lib.hellocharts.view.LineChartView
-import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class TrafficStatsScrollingActivity : AppCompatActivity() {
 
     private var networkStatsManager: NetworkStatsManager? = null
-    private var mRpcClient: DataPlanClient?= null
+    private var mRpcClient: DataPlanClient? = null
+    private var mListView: ListView? = null
 
     @TargetApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_traffic_stats_scrolling)
         val toolbar = findViewById(R.id.toolbar) as Toolbar
-        val webview = findViewById(R.id.webview) as WebView
+        mListView = findViewById(R.id.plan_listview) as ListView
+
+
+        val dataPlanMsgList = ArrayList<DataPlanMsg>()
+        val adapter = PlanRecommendationListAdapter(this,
+                R.layout.item_list_plan_recommendation, dataPlanMsgList)
+        mListView?.adapter = adapter
         mRpcClient = DataPlanClient("ec2-34-211-226-27.us-west-2.compute.amazonaws.com", 50051)
 
 
-
-
-//        webview.loadUrl("http://www.verizon.com")
         setSupportActionBar(toolbar)
         hasPermissionToReadNetworkStats()
         PermissionUtils.checkPermission(this, Manifest.permission.READ_PHONE_STATE)
         val fab = findViewById(R.id.fab) as FloatingActionButton
         fab.setOnClickListener { view ->
             run {
+
+                val manager = this.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+                val carrierName = manager.networkOperatorName
+                Snackbar.make(view, "$carrierName is used", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show()
+
+
                 networkStatsManager = getSystemService(Context.NETWORK_STATS_SERVICE) as NetworkStatsManager
 
 
@@ -68,55 +73,46 @@ class TrafficStatsScrollingActivity : AppCompatActivity() {
                 Log.i("Info", "Daily Use ${DataUtils.convertByteToMB(bucket!!.rxBytes + bucket.txBytes)}")
                 bucket = networkStatsManager?.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE, getSubscriberId(this, ConnectivityManager.TYPE_MOBILE), monthStart, System.currentTimeMillis())
                 Log.i("Info", "Monthly Use ${DataUtils.convertByteToMB(bucket!!.rxBytes + bucket.txBytes)}")
+
+
                 val timeIntervals = TimeUtils.getDateIntervalsInMillis()
-                val rxUsageByDay = ArrayList<Float>()
-                val txUsageByDay = ArrayList<Float>()
-                val dates = ArrayList<String>()
+
+
+//                val rxUsageByDay = ArrayList<Float>()
+//                val txUsageByDay = ArrayList<Float>()
+                val dataUsageByDay = ArrayList<Double>()
+                val dates = ArrayList<Date>()
+//                val dates = Array<Date>(timeIntervals.size)
+//                val dates = ArrayList<Date>()
                 val subscriberId = getSubscriberId(this, ConnectivityManager.TYPE_MOBILE)
+
+//                for (i in 1 until timeIntervals.size) {
+//                    bucket = networkStatsManager?.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE,
+//                            subscriberId, timeIntervals[i - 1], timeIntervals[i])
+//                    dates.add(SimpleDateFormat("MM/dd/yyyy").format(Date(timeIntervals[i - 1])))
+//                    rxUsageByDay.add(DataUtils.convertByteToMB(bucket!!.rxBytes))
+//                    txUsageByDay.add(DataUtils.convertByteToMB(bucket.txBytes))
+//                }
+//
+//
                 for (i in 1 until timeIntervals.size) {
                     bucket = networkStatsManager?.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE,
                             subscriberId, timeIntervals[i - 1], timeIntervals[i])
-                    dates.add(SimpleDateFormat("MM/dd/yyyy").format(Date(timeIntervals[i - 1])))
-                    rxUsageByDay.add(DataUtils.convertByteToMB(bucket!!.rxBytes))
-                    txUsageByDay.add(DataUtils.convertByteToMB(bucket.txBytes))
+
+                    dates.add(Date(timeIntervals[i]))
+                    dataUsageByDay.add(DataUtils.convertByteToMB(bucket!!.rxBytes + bucket.txBytes).toDouble())
+
                 }
+                val userParams = mRpcClient!!.getUserParams(dates.toTypedArray(), dataUsageByDay.toDoubleArray(), 0.01)
+                val plans = mRpcClient!!.getRecommendDataPlans(userParams.userParams)
+                adapter.addAll(plans)
 
-                Log.i("Usage", "$dates")
-                Log.i("Usage", "$rxUsageByDay")
-                Log.i("Usage", "$txUsageByDay")
-//                Log.i("test", "${ProtoMapper.asRpcObjectArray(dates, rxUsageByDay, txUsageByDay)}")
+//
+//                Snackbar.make(view, "Total rx ${rxUsageByDay.sum()}, tx ${txUsageByDay.sum()} from ${dates[0]}", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show()
 
-                val recommendationUri = "https://www.google.com"
-                Snackbar.make(view, "According to your data usage we recommend ${mRpcClient?.helloWorld()}", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show()
-
-//                val uri = Uri.parse(recommendationUri)
-//                val intent = Intent(Intent.ACTION_VIEW, uri)
-//                startActivity(intent)
             }
         }
-
-
-        val values = ArrayList<PointValue>()
-        values.add(PointValue(0f, 2f))
-        values.add(PointValue(1f, 4f))
-        values.add(PointValue(2f, 3f))
-        values.add(PointValue(3f, 4f))
-        values.add(PointValue(3f, 4f))
-        values.add(PointValue(3f, 4f))
-        values.add(PointValue(3f, 4f))
-
-        //In most cased you can call data model methods in builder-pattern-like manner.
-        val line = Line(values).setColor(Color.BLUE).setCubic(true)
-        val lines = ArrayList<Line>()
-        lines.add(line)
-
-        val data = LineChartData()
-        data.setLines(lines)
-
-        val chart = LineChartView(this)
-        chart.setLineChartData(data)
-
 
     }
 

@@ -34,13 +34,42 @@
 
     <include layout="@layout/content_traffic_stats_scrolling" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/fab_margin"
+        android:layout_margin="@dimen/fab_bar_margin"
         app:layout_anchor="@id/app_bar"
         app:layout_anchorGravity="bottom|end"
-        app:srcCompat="@android:drawable/ic_popup_sync" />
+        android:orientation="horizontal">
 
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_marginStart="@dimen/fab_margin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@android:drawable/ic_popup_sync" />
+
+        <!--<android.support.design.widget.FloatingActionButton-->
+            <!--android:id="@+id/update"-->
+            <!--android:layout_marginStart="@dimen/fab_margin"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--app:srcCompat="@android:drawable/ic_popup_reminder" />-->
+    </LinearLayout>
+    <!--<android.support.design.widget.FloatingActionButton-->
+    <!--android:id="@+id/fab"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_margin="@dimen/fab_margin"-->
+    <!--app:layout_anchor="@id/app_bar"-->
+    <!--app:layout_anchorGravity="bottom|end"-->
+    <!--app:srcCompat="@android:drawable/ic_popup_sync" />-->
+    <!--<android.support.design.widget.FloatingActionButton-->
+    <!--android:id="@+id/update"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_margin="@dimen/fab_margin"-->
+    <!--app:layout_anchor="@id/app_bar"-->
+    <!--app:layout_anchorGravity="bottom|start"-->
+    <!--app:srcCompat="@android:drawable/ic_popup_reminder" />-->
 </android.support.design.widget.CoordinatorLayout>
