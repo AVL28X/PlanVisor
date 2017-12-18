@@ -7,11 +7,12 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.TextView
-import io.chenxi.easyplan.rpc.client.DataPlanMsg
+import io.chenxi.easyplan.rpc.client.DataPlanClient
+import java.util.*
 
 
 class PlanRecommendationListAdapter(context: Context, LayoutResourceId: Int,
-                                    itemList: List<DataPlanMsg>) : ArrayAdapter<DataPlanMsg>(context, LayoutResourceId, itemList) {
+                                    itemList: List<Any>) : ArrayAdapter<Any>(context, LayoutResourceId, itemList) {
 
     companion object {
         enum class ISP {
@@ -28,7 +29,6 @@ class PlanRecommendationListAdapter(context: Context, LayoutResourceId: Int,
     }
 
     private val mResourceId: Int = LayoutResourceId
-    private val mListObjects: List<DataPlanMsg> = itemList
     private val mInflater = LayoutInflater.from(context)
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val view: View
@@ -41,13 +41,23 @@ class PlanRecommendationListAdapter(context: Context, LayoutResourceId: Int,
             view = convertView
             viewHolder = view.tag as ListRowHolder
         }
-        val dataPlanMsg: DataPlanMsg = getItem(position)
+        val dataPlanMsg = getItem(position)
 
         //dataPlanMsg.
+        val desc = DataPlanClient.extractDesc(dataPlanMsg)
+        val carrierName = desc.split(' ')[0].toLowerCase()
+        viewHolder.textViewName.text = DataPlanClient.extractName(dataPlanMsg)
+        viewHolder.textViewDesc.text = desc
+        viewHolder.textViewPrice.text = "%.2f for \n$%.2f/mo".format(DataPlanClient.extractQuota(dataPlanMsg), DataPlanClient.extractPrice(dataPlanMsg))
+
+
+        when (carrierName) {
+            "at&t" -> viewHolder.imageViewLogo.setImageResource(R.mipmap.ic_att)
+            "verizon" -> viewHolder.imageViewLogo.setImageResource(R.mipmap.ic_verizon)
+            "t-mobile" -> viewHolder.imageViewLogo.setImageResource(R.mipmap.ic_tmobile)
+        }
+
         viewHolder.imageViewLogo.setImageResource(R.mipmap.ic_verizon)
-        viewHolder.textViewName.text = dataPlanMsg.name
-        viewHolder.textViewDesc.text = dataPlanMsg.description
-        viewHolder.textViewPrice.text = "%lf for \n$%lf/mo".format(dataPlanMsg.quota, dataPlanMsg.price)
 
 //
 //        when (position%3) {

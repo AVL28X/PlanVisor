@@ -1,10 +1,10 @@
 package io.chenxi.easyplan.rpc.client;
 
+import android.util.Log;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -18,6 +18,7 @@ public class DataPlanClient {
     private final DataPlanServiceGrpc.DataPlanServiceBlockingStub blockingStub;
 
     public static final boolean IS_DRY_RUN = true;
+
 
     /**
      * Construct client connecting to HelloWorld server at {@code host:port}.
@@ -42,6 +43,22 @@ public class DataPlanClient {
         channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
     }
 
+    public static String extractName(Object o) {
+        return ((DataPlanMsg) o).getName();
+    }
+
+    public static double extractPrice(Object o) {
+        return ((DataPlanMsg) o).getPrice();
+    }
+
+    public static double extractQuota(Object o) {
+        return ((DataPlanMsg) o).getQuota();
+    }
+
+    public static String extractDesc(Object o) {
+        return ((DataPlanMsg) o).getDescription();
+    }
+
     public static Date[] generateTestDates() {
         Date[] dates = new Date[30];
         Date today = new Date();
@@ -57,6 +74,9 @@ public class DataPlanClient {
         double[] usages = new double[dates.length];
         for (int i = 0; i < dates.length; i++) {
             usages[i] = (i % 7) * 10 + Math.random() * 1;
+//            if(i<28){
+//                usages[i] = 0.0;
+//            }
         }
         return usages;
     }
@@ -82,12 +102,18 @@ public class DataPlanClient {
 
     public UserParamResponse getUserParams(Date[] dates, double[] usages, double overage) {
 
+//        System.out.println(Arrays.toString(dates));
+//        System.out.println(Arrays.toString(usages));
+
+        dates = generateTestDates();
+        usages = generateRandomUsages(dates);
         UserParamRequest.Builder builder = UserParamRequest.newBuilder();
         for (int i = 0; i < dates.length; i++) {
             Date date = dates[i];
             Usage usage = Usage.newBuilder().setUsage(usages[i]).setDay(date.getDay()).setMonth(date.getMonth()).setYear(date.getYear()).build();
             builder.addUsages(usage);
         }
+
         builder.setOverage(overage);
         return this.blockingStub.getUserParam(builder.build());
     }
@@ -103,17 +129,31 @@ public class DataPlanClient {
         return response.getUtility();
     }
 
+
+    public ArrayList getRecommendDataPlans(Date[] dates, double[] usages, double overage) {
+        Log.i("tag", "beginning to get recommend data plans");
+
+
+        UserParams userParams = getUserParams(dates, usages, overage).getUserParams();
+        Log.i("tag", "user params received");
+        List<DataPlanMsg> dataPlans = getRecommendDataPlans(userParams);
+        ArrayList ret = new ArrayList();
+        ret.addAll(dataPlans);
+        return ret;
+    }
+
     public List<DataPlanMsg> getRecommendDataPlans(UserParams userParams) {
         DataPlanRequest request = DataPlanRequest.newBuilder().setUserParams(userParams).build();
         DataPlanResponse response = this.blockingStub.getRecommendedDataPlans(request);
         return response.getDataPlansList();
     }
 
-    public void helloWorld() {
+    public String helloWorld() {
         HWRequest request = HWRequest.newBuilder().setWord("Hello from client").build();
         System.out.println(request);
         HWResponse response = this.blockingStub.helloWorld(request);
         System.out.println(response);
+        return response.getWord();
     }
 
     /**
@@ -121,8 +161,8 @@ public class DataPlanClient {
      * greeting.
      */
     public static void main(String[] args) throws Exception {
-        //String host = "ec2-34-211-226-27.us-west-2.compute.amazonaws.com";
-        String host = "localhost";
+        String host = "ec2-34-211-116-143.us-west-2.compute.amazonaws.com";
+//        String host = "localhost";
         DataPlanClient client = new DataPlanClient(host, 50051);
 
         //Test Hello World
@@ -134,30 +174,30 @@ public class DataPlanClient {
         System.out.println(dataPlanMsg);
 
         //Test parameter estimation
-        Date[] dates = generateTestDates();
-        double[] usages = generateRandomUsages(dates);
-        UserParamResponse userParamsResponse = client.getUserParams(dates, usages, dataPlanMsg.getOverage());
-        UserParams userParams = userParamsResponse.getUserParams();
-        UserParamsStd userParamsStd = userParamsResponse.getUserParamsStd();
-        System.out.println("Calibrated Params:");
-        System.out.println(userParams);
-        System.out.println("Standard Deviation:");
-        System.out.println(userParamsStd);
-
-        UsagesResponse response = client.getRecommendUsages(2017, 12, userParams, dataPlanMsg);
-        System.out.println("Recommended Usages: ");
-        System.out.println(response);
-
-        // Calculate Utility
-        double utility = client.getUtility(userParams, dataPlanMsg);
-        System.out.println("Utility of data plan: ");
-        System.out.println(utility);
-        // Get DataPlans
-        List<DataPlanMsg> dataPlanMsgs = client.getRecommendDataPlans(userParams);
-        System.out.println("Recommended Data Plans");
-        for (DataPlanMsg dp : dataPlanMsgs) {
-            System.out.println(dp);
-        }
+//        Date[] dates = generateTestDates();
+//        double[] usages = generateRandomUsages(dates);
+//        UserParamResponse userParamsResponse = client.getUserParams(dates, usages, dataPlanMsg.getOverage());
+//        UserParams userParams = userParamsResponse.getUserParams();
+//        UserParamsStd userParamsStd = userParamsResponse.getUserParamsStd();
+//        System.out.println("Calibrated Params:");
+//        System.out.println(userParams);
+//        System.out.println("Standard Deviation:");
+//        System.out.println(userParamsStd);
+//
+//        UsagesResponse response = client.getRecommendUsages(2017, 12, userParams, dataPlanMsg);
+//        System.out.println("Recommended Usages: ");
+//        System.out.println(response);
+//
+//        // Calculate Utility
+//        double utility = client.getUtility(userParams, dataPlanMsg);
+//        System.out.println("Utility of data plan: ");
+//        System.out.println(utility);
+//        // Get DataPlans
+//        List<DataPlanMsg> dataPlanMsgs = client.getRecommendDataPlans(userParams);
+//        System.out.println("Recommended Data Plans");
+//        for (DataPlanMsg dp : dataPlanMsgs) {
+//            System.out.println(dp);
+//        }
         client.shutdown();
 
     }

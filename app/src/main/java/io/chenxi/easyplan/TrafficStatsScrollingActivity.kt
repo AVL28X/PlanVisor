@@ -21,7 +21,6 @@ import android.telephony.TelephonyManager
 import android.util.Log
 import android.widget.ListView
 import io.chenxi.easyplan.rpc.client.DataPlanClient
-import io.chenxi.easyplan.rpc.client.DataPlanMsg
 import io.chenxi.easyplan.util.DataUtils
 import io.chenxi.easyplan.util.PermissionUtils
 import io.chenxi.easyplan.util.TimeUtils
@@ -43,11 +42,11 @@ class TrafficStatsScrollingActivity : AppCompatActivity() {
         mListView = findViewById(R.id.plan_listview) as ListView
 
 
-        val dataPlanMsgList = ArrayList<DataPlanMsg>()
+        val dataPlanMsgList = ArrayList<Any>()
         val adapter = PlanRecommendationListAdapter(this,
                 R.layout.item_list_plan_recommendation, dataPlanMsgList)
         mListView?.adapter = adapter
-        mRpcClient = DataPlanClient("ec2-34-211-226-27.us-west-2.compute.amazonaws.com", 50051)
+        mRpcClient = DataPlanClient("ec2-34-211-116-143.us-west-2.compute.amazonaws.com", 50051)
 
 
         setSupportActionBar(toolbar)
@@ -78,39 +77,20 @@ class TrafficStatsScrollingActivity : AppCompatActivity() {
                 val timeIntervals = TimeUtils.getDateIntervalsInMillis()
 
 
-//                val rxUsageByDay = ArrayList<Float>()
-//                val txUsageByDay = ArrayList<Float>()
-                val dataUsageByDay = ArrayList<Double>()
-                val dates = ArrayList<Date>()
-//                val dates = Array<Date>(timeIntervals.size)
-//                val dates = ArrayList<Date>()
+                val dataUsageByDay = DoubleArray(timeIntervals.size, { i -> .0 }).toTypedArray()
+                val dates = Array(timeIntervals.size, { i -> Date() })
                 val subscriberId = getSubscriberId(this, ConnectivityManager.TYPE_MOBILE)
 
-//                for (i in 1 until timeIntervals.size) {
-//                    bucket = networkStatsManager?.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE,
-//                            subscriberId, timeIntervals[i - 1], timeIntervals[i])
-//                    dates.add(SimpleDateFormat("MM/dd/yyyy").format(Date(timeIntervals[i - 1])))
-//                    rxUsageByDay.add(DataUtils.convertByteToMB(bucket!!.rxBytes))
-//                    txUsageByDay.add(DataUtils.convertByteToMB(bucket.txBytes))
-//                }
-//
-//
-                for (i in 1 until timeIntervals.size) {
+                for (i in 0 until timeIntervals.size - 1) {
                     bucket = networkStatsManager?.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE,
-                            subscriberId, timeIntervals[i - 1], timeIntervals[i])
-
-                    dates.add(Date(timeIntervals[i]))
-                    dataUsageByDay.add(DataUtils.convertByteToMB(bucket!!.rxBytes + bucket.txBytes).toDouble())
+                            subscriberId, timeIntervals[i], timeIntervals[i + 1])
+                    dates[i] = Date(timeIntervals[i])
+                    dataUsageByDay[i] = (DataUtils.convertByteToMB(bucket!!.rxBytes + bucket.txBytes).toDouble())
 
                 }
-                val userParams = mRpcClient!!.getUserParams(dates.toTypedArray(), dataUsageByDay.toDoubleArray(), 0.01)
-                val plans = mRpcClient!!.getRecommendDataPlans(userParams.userParams)
+                val plans = mRpcClient!!.getRecommendDataPlans(dates, dataUsageByDay.toDoubleArray(), 0.01)
+                adapter.clear()
                 adapter.addAll(plans)
-
-//
-//                Snackbar.make(view, "Total rx ${rxUsageByDay.sum()}, tx ${txUsageByDay.sum()} from ${dates[0]}", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show()
-
             }
         }
 
